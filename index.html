@@ -1,0 +1,86 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Guía para bastionar el arranque de un sistema con Debian</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid="ID de Google Analytics"
+                  id="idjmclbrs001"
+                  title="Guía para bastionar el arranque de un sistema con Debian"
+                  environment="web"
+                  feedback-link="https://github.com/JMCumbrera">
+    
+      <google-codelab-step label="Archivos principales del GRUB2" duration="5">
+        <p>La gran mayoría de sistemas Linux utilizan el sistema GRUB2 para gestionar el arranque, y debido a la importancia de este, vamos a explicar la función de los scripts y ficheros más importantes:</p>
+<ul>
+<li><strong>/boot/grub/grub.cfg:</strong> Este archivo contiene la configuración de menú de GRUB2, incluyendo la pantalla de bienvenida y la lista de sistemas operativos para arrancar. Se actualiza automáticamente cuando se instalan o desinstalan kernels. Para realizar cambios, se debe modificar los archivos en <em>/etc/default/grub</em> y <em>/etc/grub.d/</em>, en lugar de editar este archivo directamente debido a que los cambios aquí pueden perderse.</li>
+<li><strong>/etc/default/grub:</strong> Archivo que controla la configuración de usuario y el entorno de GRUB2, permitiendo ajustar las opciones generales. Puedes ver las opciones disponibles utilizando el comando <code>info -f grub -n 'Simple configuration'</code>. Cuando hagas cambios en este archivo, asegúrate de ejecutar <code>grub-mkconfig</code> para generar el nuevo archivo de configuración de GRUB sin agregarlo a la ruta y verificarlo, luego usa <code>update-grub</code> para generarlo y colocarlo en <em>/boot/grub/grub.cfg</em>.</li>
+<li><strong>Scripts en /etc/grub.d:</strong> Estos scripts se utilizan durante la ejecución de comandos como <code>grub-mkconfig</code> o <code>update-grub</code> para generar un nuevo archivo de configuración de GRUB, que generalmente se guarda en <em>/boot/grub/grub.cfg</em>. Los pasos a seguir son: <ol type="1">
+<li>Modificar las configuraciones en <em>/etc/default/grub</em></li>
+<li>Ejecutar <code>grub-mkconfig</code> o <code>update-grub</code></li>
+<li>Estos comandos utilizan los scripts en <em>/etc/grub.d/</em> junto con la información de <em>/etc/default/grub</em> para generar un nuevo archivo de configuración, que se coloca en <em>/boot/grub/grub.cfg</em></li>
+</ol>
+</li>
+<li><strong>/boot/grub/custom.cfg:</strong> El archivo <em>/boot/grub/custom.cfg</em> es una opción adicional que te permite incorporar elementos personalizados al menú de arranque de tu sistema. Esta es una alternativa práctica para personalizar el menú de arranque sin necesidad de modificar el script <em>40_custom</em>, que es otra forma de lograrlo.</li>
+</ul>
+<p>Finalmente, es importante mencionar el hecho que el nuevo GRUB2 añade la posibilidad de asignar roles de usuario con privilegios distintos.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Protección del arranque con una contraseña" duration="0">
+        <p>Duration 0:08:00</p>
+<p>Lo primero a tener en cuenta para proteger el arranque con una contraseña es editar el archivo de configuración. Para lograr esta protección seguiremos los pasos siguientes:</p>
+<ol type="1">
+<li>Editamos el archivo de configuración, agregando al final las líneas <code>set superusers="root"</code> y <code>password root <CONTRASEÑA></code>, logrando con esto establecer un usuario y contraseña como protección al iniciar el sistema.<img alt="PIC1" src="img\\46db3536808a7a95.png"><img alt="PIC2" src="img\\cfd5a1b1065ea8ed.png"></li>
+<li>Guardamos los cambios con el comando <code>sudo update-grub</code>.<img alt="PIC3" src="img\\a373df164a61cb7a.png"></li>
+<li>Como podremos ver, si reiniciamos el SO, veremos que nos pide el usuario y contraseña configurados, dejándonos acceder a nuestro usuario sólo si hemos introducido el usuario y contraseña correctamente.<img alt="PIC4" src="img\\ffe6e27ddb4f9b2e.png"><img alt="PIC5" src="img\\d2bd3e66b580f51e.png"></li>
+<li>Para cifrar la contraseña recién configurada, a fin de aumentar la seguridad, ejecutaremos el comando <code>grub-mkpasswd-pbkdf2</code>, el cual nos pedirá que introduzcamos la contraseña que queremos cifrar, devolviéndonosla ya encriptada. Una vez tenemos la cadena cifrada, editaremos el archivo de configuración <em>40_custom</em>, donde cambiaremos la parte donde se puede leer <code>password</code> por <code>password_pbkdf2</code>, y la contraseña original la sustituiremos por la encriptada.<img alt="PIC6" src="img\\a81720011c3cb5f5.png"><img alt="PIC7" src="img\\b53e7b3f98bb9aac.png"></li>
+<li>Finalmente, configuraremos los permisos del archivo <em>40_custom</em> para que sólo pueda ser editado por el root.<img alt="PIC8" src="img\\c3acb1b057ba2ea0.png"></li>
+<li>Como podemos observar, si tratamos de editarlo con nuestro usuario común, nos lo impedirá.<img alt="PIC9" src="img\\3cf314f690a0224.png"></li>
+</ol>
+<p>Recordemos que al iniciar sesión con el usuario root a través del comando <code>su root</code>, el uso de <code>sudo</code> se torna innecesario, debido a que ya estamos haciendo uso de los privilegios del root, excepto cuando usamos comandos como <code>update-grub</code>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Ocultación del menú GRUB2 en el arranque" duration="0">
+        <p>Duration 0:07:00</p>
+<p>Para lograr una mayor seguridad en nuestro sistema Debian, podemos ocultar el menú GRUB2 al arrancar el SO, a fin que nadie pueda tratar de manipularlo ni editarlo con fines maliciosos. Para ello debemos seguir una serie de sencillos pasos:</p>
+<ol type="1">
+<li>Abriremos el archivo <em>/etc/default/grub</em>.<img alt="PIC10" src="img\\355e7780abab2f7b.png"></li>
+<li>Cambiamos <code>GRUB_TIMEOUT=5</code> POR <code>GRUB_TIMEOUT=0</code>.<img alt="PIC11" src="img\\ef293b3ee43515a8.png"></li>
+<li>Guardamos el archivo, y ejecutamos el comando <code>sudo update-grub</code>.<img alt="PIC12" src="img\\935065ca95253191.png"></li>
+<li>Cuando reiniciamos el sistema nos aparecerá directamente el panel para iniciar sesión con nuestro usuario, sin mostrar el menú del GRUB. Si tenemos configurada la contraseña de arranque, se nos mostrará esto antes.<img alt="PIC13" src="img\\7bdd0b7d6c7b0c64.png"></li>
+</ol>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2023-10-26T14:27:12+02:00",
+  "id": "idjmclbrs001",
+  "duration": 5,
+  "title": "Guía para bastionar el arranque de un sistema con Debian",
+  "summary": "Guía paso a paso para fortalecer la seguridad de la BIOS en un sistema Windows",
+  "source": "codelab.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "codelab",
+    "markdown"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://github.com/JMCumbrera",
+  "ga": "ID de Google Analytics",
+  "url": "idjmclbrs001"
+}
